@@ -179,3 +179,10 @@ function drawLineStrip(gl, data, fragmentShaderSource) {
 
     gl.drawArrays(gl.LINE_STRIP, 0, data.numVertices);
 }
+
+function processFunction() {
+    let removeWhitespacePattern = /\s+/g;  //   /pattern/modifiers
+    let whitespaceRemoved = document.getElementById("userString").value.replace(removeWhitespacePattern, "");
+    let implicitMultiplicationPattern = /\)\(/g;
+    document.getElementById("result").innerHTML = whitespaceRemoved.replace(implicitMultiplicationPattern, "*");
+}
