@@ -183,6 +183,80 @@ function drawLineStrip(gl, data, fragmentShaderSource) {
 function processFunction() {
     let removeWhitespacePattern = /\s+/g;  //   /pattern/modifiers
     let whitespaceRemoved = document.getElementById("userString").value.replace(removeWhitespacePattern, "");
-    let implicitMultiplicationPattern = /\)\(/g;
-    document.getElementById("result").innerHTML = whitespaceRemoved.replace(implicitMultiplicationPattern, "*");
+    
+    let implicitMultiplicationPattern = /(\)|x|\d(?=\D))(?=\(|x|\d)/g;
+
+    let implicitMultiplicationString = whitespaceRemoved.replace(implicitMultiplicationPattern, "$1*");
+
+    document.getElementById("result").innerHTML = implicitMultiplicationString;
+
+    //convert to lowercase? Depends on if we replace things like cos() with some temporary var
+}
+
+const nonTerminalList = ['S', 'A', 'T', 'B', 'R'];
+const terminalList = ['+', '-', '*', '/', 'x', '(', ')', '$'];
+
+const map = {
+    S: {"+": "!", "-": "!", "*": "!", "/": "!", "x": "AT", "(": "AT", ")": "!", "$": "!"},
+    A: {"+": "AT+", "-": "AT-", "*": "!", "/": "!", "x": "!", "(": "!", ")": "", "$": ""},  // S'
+    T: {"+": "!", "-": "!", "*": "!", "/": "!", "x": "BR", "(": "BR", ")": "!", "$": "!"},
+    B: {"+": "", "-": "", "*": "BR*", "/": "BR/", "x": "!", "(": "!", ")": "", "$": ""},    // T'
+    R: {"+": "!", "-": "!", "*": "!", "/": "!", "x": "x", "(": ")S(", ")": "!", "$": "!"}
+};
+
+/**
+ * 
+ * @param {string} func 
+ */
+function validateProperFunction(func) {
+    let numberRemover = /\d+(\.\d+)?/g; // This may need additional work. It fails for .32 or something similar (must do 0.32).
+
+    let input = func.replace(numberRemover, "x");
+
+    let invalidCharacters = /[^+\-*/x()]/g;
+    if (input.search(invalidCharacters) != -1) {
+        return false;
+    }
+
+    input += "$";
+
+    let charStack = ['S'];
+    let point = 0;
+    let failed = false;
+    // map["S"]["+"];
+
+    while (point < input.length && !failed) {
+        //if (charStack.empty())
+			//{
+				//cout << "String not accepted\n"; //print string contents?
+				//break;
+            //}
+        let currentElem = charStack.pop();
+        let terminalLocation = input.search();
+        let nonTerminalLocation = input.search();
+
+        while(!terminalList.includes(currentElem)) {
+            if(map[currentElem][input[point]] == "!") {
+                failed = true;
+                break;
+                // print error?
+            }
+
+            [...map[currentElem][input[point]]].forEach(c => charStack.push(c));
+
+            if(!charStack.length) {// if the array is empty
+                if(input[point] != '$') {
+                    failed = true;
+                    // print error?
+                }
+                break;
+            }
+
+            currentElem = charStack.pop();
+        }
+
+        point++;
+    }
+
+    return !charStack.length && !failed;
 }
