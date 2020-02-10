@@ -71,7 +71,7 @@ function makeProgram(gl, vertexSource, fragmentSource) {
 /**
  *
  */
-function draw() {
+function draw(tree) {
     let drawWindow = document.getElementById("screen");
 
     /** @type {WebGLRenderingContext} */
@@ -85,7 +85,7 @@ function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     let axisBuffer = createAxises(gl);
-    let polynomialBuffer = createPolynomial(gl);
+    let polynomialBuffer = createPolynomial(gl, tree);
 
     drawLines(gl, axisBuffer, axisShader)
     drawLineStrip(gl, polynomialBuffer, purpleFragmentShaderSource);    
@@ -109,17 +109,19 @@ function makeStaticDrawArrayBuffer(gl, verticeArray, numVertices) {
  *
  * @param {WebGLRenderingContext} gl The WebGL context
  */
-function createPolynomial(gl) {
+function createPolynomial(gl, tree) {
+    console.log("Entering createPolynomial");
     let numVertices = 201;
 
     let verticeArray = [];
 
     for(let x = -100; x <= 100; x++) {
         let xi = x / 100;
-        let yi = xi * xi * xi;
-        verticeArray.push(xi, yi, 0);
+        let yi = evaluateFunction(tree, xi);
+        verticeArray.push(xi, yi, 0.0);
     }
 
+    console.log("Exiting createPolynomial");
     return makeStaticDrawArrayBuffer(gl, verticeArray, numVertices);
 }
 
@@ -181,6 +183,7 @@ function drawLineStrip(gl, data, fragmentShaderSource) {
 }
 
 function processFunction() {
+    console.log("Entering processFunction");
     let removeWhitespacePattern = /\s+/g;  //   /pattern/modifiers
     let whitespaceRemoved = document.getElementById("userString").value.replace(removeWhitespacePattern, "");
     
@@ -194,8 +197,14 @@ function processFunction() {
         console.error("Invalid function!");
     }
     else {
-        console.log(evaluateFunction(createParseTree(implicitMultiplicationString), 1));
+        let tree = createParseTree(implicitMultiplicationString);
+    
+        draw(tree);
+
+        console.log(evaluateFunction(tree, 1));
     }
+
+    console.log("Exiting processFunction");
 
     //convert to lowercase? Depends on if we replace things like cos() with some temporary var
 }
@@ -215,6 +224,7 @@ const map = {
  * @param {string} func 
  */
 function validateProperFunction(func) {
+    console.log("Entering validateProperFunction with function: " + func);
     let numberRemover = /\d+(\.\d+)?/g; // This may need additional work. It fails for .32 or something similar (must do 0.32).
 
     let input = func.replace(numberRemover, "x");
@@ -262,6 +272,11 @@ function validateProperFunction(func) {
         point++;
     }
 
+    console.log("Char stack: " + charStack);
+    console.log("Remainng string characters: " + input.substr(point));
+    console.log("Exiting validateProperFunction");
+    
+
     return !charStack.length && !failed;
 }
 
@@ -289,7 +304,7 @@ class Token {
             this.tokenType = TokenType.OPEN_PARANTHESES;
         }
         else if (token == ")") {
-            this.TokenType = TokenType.CLOSE_PARANTHESES;
+            this.tokenType = TokenType.CLOSE_PARANTHESES;
         }
         else if (token == "+" || token == "-") {
             this.tokenType = TokenType.ADDITION;
@@ -326,6 +341,7 @@ class TokenList {
  * @return {TokenList}
  */
 function tokenize(input) {
+    console.log("Entering tokenize with input: " + input);
     let tokenRetriever = /(\d+(\.\d+)?|[+\-*/x()])/; // This may need additional work. It fails for .32 or something similar (must do 0.32).
     let tokenList = new TokenList(); 
 
@@ -335,6 +351,7 @@ function tokenize(input) {
         tokenList.add(new Token(token));
     }
 
+    console.log("Exiting tokenize");
     return tokenList;
 }
 
@@ -369,9 +386,18 @@ function findSplitToken(expressionType, startToken, endToken) {
         tokenType = TokenType.MULTIPLICATION;
     }
 
+    let closeParantheses = 0;
+
     while(currentToken != startToken && currentToken != startToken.previous) {
-        if(currentToken.tokenType == tokenType) {
+        if(currentToken.tokenType == tokenType && closeParantheses == 0) {
             return currentToken;
+        }
+
+        if(currentToken.tokenType == TokenType.OPEN_PARANTHESES) {
+            closeParantheses--;
+        }
+        else if(currentToken.tokenType == TokenType.CLOSE_PARANTHESES) {
+            closeParantheses++;
         }
 
         currentToken = currentToken.previous;
@@ -432,11 +458,13 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
 }
 
 function createParseTree(input) {
+    console.log("Entering createParseTree with input: " + input);
     let tokenList = tokenize(input);
     let tree = new TreeNode();
 
     createParseTreeNodes(tree, ExpressionType.EXP, tokenList.head, tokenList.tail);
     console.log(printParseTree(tree));
+    console.log("Exiting createParseTree");
     return tree;
 }
 
@@ -463,10 +491,7 @@ function evaluateFunction(tree, x) {
         return tree.token.value;
     }
     else if (tree.token.value == "*") {
-        let left = evaluateFunction(tree.leftChild, x);
-        let right = evaluateFunction(tree.rightChild, x);
-        result = Number(left) * Number(right);
-        return result;
+        return Number(evaluateFunction(tree.leftChild, x)) * Number(evaluateFunction(tree.rightChild, x));
     }
     else if (tree.token.value == "/") {
         let numerator = Number(evaluateFunction(tree.leftChild, x));
@@ -480,15 +505,9 @@ function evaluateFunction(tree, x) {
         return numerator / denominator;
     }
     else if (tree.token.value == "+") {
-        let left = evaluateFunction(tree.leftChild, x);
-        let right = evaluateFunction(tree.rightChild, x);
-        result = Number(left) + Number(right);
-        return result;
+        return Number(evaluateFunction(tree.leftChild, x)) + Number(evaluateFunction(tree.rightChild, x));
     }
     else { //if (tree.token.value == "-") {
-        result = Number(evaluateFunction(tree.leftChild, x)) - Number(evaluateFunction(tree.rightChild, x));
-        return result;
+        return Number(evaluateFunction(tree.leftChild, x)) - Number(evaluateFunction(tree.rightChild, x));
     }
 }
-
-// IMPLEMENT PARANTHESE BALANCING!!!
