@@ -292,8 +292,14 @@ function validateProperFunction(func) {
 //    return {"input": input, "token": token};
 //}
 
+/**
+ * 
+ */
 const TokenType = Object.freeze({OPEN_PARANTHESES: 1, CLOSE_PARANTHESES: 2, VALUE: 3, ADDITION: 4, MULTIPLICATION: 5});
 
+/**
+ * 
+ */
 class Token {
     constructor(token) {
         this.next = null;
@@ -377,6 +383,18 @@ class TreeNode {
 
 const ExpressionType = Object.freeze({EXP: 1, MEXP: 2, PEXP: 3});
 
+/**
+ * Finds the token that the function parse tree should be split at. Searches from the endToken to the startToken looking
+ * for the first token with TokenType.ADDITION (if ExpressionType.EXP) or TokenType.MULTIPLICATION (if ExpressionType.MEXP)
+ * where the parantheses are balanced. Returns null if no token meets the requirement. NOTE: startToken and endToken don't
+ * have to be the first and last tokens in the token list.
+ * 
+ * @param {ExpressionType} expressionType The type of expression. Should be either ExpressionType.MEXP or ExpressionType.EXP.
+ * @param {Token} startToken The first token in the token list to search.
+ * @param {Token} endToken The final token in the token list to search.
+ * 
+ * @return {Token} The token to split at. Returns null if there was no split token found.
+ */
 function findSplitToken(expressionType, startToken, endToken) {
     let currentToken = endToken;
 
@@ -407,11 +425,12 @@ function findSplitToken(expressionType, startToken, endToken) {
 }
 
 /**
+ * Creates a parse tree for a tokenized function. It should be read from the bottom-left to the top-right.  
  * 
- * @param {TreeNode} root 
- * @param {ExpressionType} expressionType 
- * @param {Token} start
- * @param {Token} end
+ * @param {TreeNode} root The root of the tree to add the nodes to.
+ * @param {ExpressionType} expressionType The type of expression. Should probably be ExpressionType.EXP.
+ * @param {Token} start The first token in the token list to parse. Should probably be TokenList.head.
+ * @param {Token} end The final token in the token list to parse. Should probably be TokenList.tail.
  */
 function createParseTreeNodes(root, expressionType, startToken, endToken) {
     while(root.value == null) {
@@ -457,6 +476,12 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
     }
 }
 
+/**
+ * Tokenizes the input and creates a function parse tree from it.
+ * 
+ * @param {string} input A function that has been validated to turn into a parse tree.
+ * @return {TreeNode} The function parse tree that was created.
+ */
 function createParseTree(input) {
     console.log("Entering createParseTree with input: " + input);
     let tokenList = tokenize(input);
@@ -479,7 +504,8 @@ function printParseTree(tree) {
 /**
  * 
  * @param {TreeNode} tree 
- * @param {*} x 
+ * @param {Number} x 
+ * @return {Number}
  */
 function evaluateFunction(tree, x) {
     let result;
