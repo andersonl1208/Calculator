@@ -1,5 +1,8 @@
 /* eslint no-unused-vars: ["warn",{ "varsIgnorePattern": "graphFunction"}] */
 
+/**
+ * Code for a vertex shader. Contains attribute position that takes the position of the vertex.
+ */
 const vertexShaderSource = `
     attribute vec4 position;
 
@@ -8,12 +11,18 @@ const vertexShaderSource = `
     }
 `;
 
+/**
+ * Code for a fragment shader. Colors the fragment purple.
+ */
 const purpleFragmentShaderSource = `
     void main() {
         gl_FragColor = vec4(0.5, 0.0, 0.5, 1.0);
     }
 `;
 
+/**
+ * Code for a fragment shader. Colors the fragment black. Intended specifically for shading axis fragments.
+ */
 const axisShader = `
     void main() {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
@@ -125,8 +134,13 @@ function createPolynomial(gl, tree) {
 }
 
 /**
+ * Creates 3D vertices to define x and y axises centered on the screen and adds them to a buffer. The vertices
+ * should be drawn with gl.LINES.
  *
  * @param {WebGLRenderingContext} gl The WebGL context
+ *
+ * @returns {*} An object containing the vertice buffer (as 'buffer') and the number of vertices in the buffer (as
+ *  'numVertices').
  */
 function createAxises(gl) {
     const numVertices = 4;
@@ -140,7 +154,7 @@ function createAxises(gl) {
 }
 
 /**
- * Draws triangles using the vertices contained in the data object
+ * Draws lines using the vertices contained in the data object
  *
  * @param {WebGLRenderingContext} gl The WebGL context
  * @param {*} data JSON object holding the buffer and the number of vertices
@@ -250,8 +264,12 @@ function handleImplicitMultiplication(func) {
 }
 
 /**
+ * Validates that a function is valid.
  *
- * @param {string} func
+ * @param {string} func String containing the function to validate. It should have no whitespace or implicit
+ *  multiplication.
+ *
+ * @returns {boolean} True if the function is valid and false if it is not.
  */
 function validateProperFunction(func) {
     const terminalList = ['+', '-', '*', '/', 'x', '(', ')', '$'];
@@ -266,9 +284,15 @@ function validateProperFunction(func) {
 
     console.log('Entering validateProperFunction with function: ' + func);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
+    // Also neeed to consider negative numbers more.
     const numberRemover = /\d+(\.\d+)?/g;
-
     let input = func.replace(numberRemover, 'x');
+
+    // Check for any number of negatives directly preceded by a *, /, + and remove them. Aso need to check for situations such as -5+3 or x*(-4+3) Anything NOT preceded by an x?
+    const negativeRemover = /(^|[^x])-+/g;
+    input = input.replace(negativeRemover, '$1');
+
+    console.log(input);
 
     const invalidCharacters = /[^+\-*/x()]/g;
     if (input.length === 0 || input.search(invalidCharacters) !== -1) {
@@ -409,7 +433,7 @@ class TokenList {
 function tokenize(input) {
     console.log('Entering tokenize with input: ' + input);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
-    const tokenRetriever = /(\d+(\.\d+)?|[+\-*/x()])/;
+    const tokenRetriever = /(\d+(\.\d+)?|[+\-*/x()])/; // must redo this to work with negative numbers. May have to do a lot of work.
     const tokenList = new TokenList();
 
     while (input.length) {
