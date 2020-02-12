@@ -15,6 +15,9 @@
     },
     "rules": {
         "semi": [ "warn", "always" ],
-        "space-before-function-paren": "off"
+        "space-before-function-paren": "off",
+        "indent": ["error", 4],
+        "brace-style": [ "warn", "stroustrup", { "allowSingleLine": true } ],
+        "max-len": ["error", { "code": 120 }]
     }
 }
