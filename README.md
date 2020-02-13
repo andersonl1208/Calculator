@@ -11,7 +11,6 @@ The files needed to run the program locally are contained in the *Calculator* fo
 
 ### Limitations and workarounds:
 - Only graphs from -1 to 1 on the x and y axises
-- Negative numbers are not handled. Workaround: Type (0-3) for -3 or (0-9.24) for -9.24.
 - Decimals starting with a . are not handled. Workaround: Type 0.32 instead of .32.
 - No trigonometry
 - No constants such as pi or e.

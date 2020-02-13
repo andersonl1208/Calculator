@@ -221,15 +221,17 @@ function processFunction(func) {
 
     const implicitMultiplicationString = handleImplicitMultiplication(whitespaceRemoved);
 
-    document.getElementById('result').innerHTML = implicitMultiplicationString;
+    const implicitAdditionString = handleImplicitAddition(implicitMultiplicationString);
+
+    document.getElementById('result').innerHTML = implicitAdditionString;
 
     let tree = null;
 
-    if (!validateProperFunction(implicitMultiplicationString)) {
+    if (!validateProperFunction(implicitAdditionString)) {
         console.error('Invalid function!');
     }
     else {
-        tree = createParseTree(implicitMultiplicationString);
+        tree = createParseTree(implicitAdditionString);
 
         console.log(evaluateFunction(tree, 1));
     }
@@ -264,6 +266,19 @@ function handleImplicitMultiplication(func) {
 }
 
 /**
+ * Adds addition symbols to a string containing a function wherever "implicit addition" occurs. "Implicit addition" is
+ * defined as subtraction of an expression, where what is happening is addition of a negative expression.
+ * Ex: 10-3 will be rewritten as 10+-3 and (x+10)-(x+3) will be rewritten as (x+10)+-(x+3).
+ *
+ * @param {string} func A function (with no whitespace) to add addition symbols to.
+ *
+ * @returns {string} The function with addition symbols added wherever implicit addition occured.
+ */
+function handleImplicitAddition(func) {
+    return func.replace(/([^\-(*/+^])-/g, '$1+-');
+}
+
+/**
  * Validates that a function is valid.
  *
  * @param {string} func String containing the function to validate. It should have no whitespace or implicit
@@ -288,7 +303,8 @@ function validateProperFunction(func) {
     const numberRemover = /\d+(\.\d+)?/g;
     let input = func.replace(numberRemover, 'x');
 
-    // Check for any number of negatives directly preceded by a *, /, + and remove them. Aso need to check for situations such as -5+3 or x*(-4+3) Anything NOT preceded by an x?
+    // Check for any number of negatives directly preceded by a *, /, + and remove them.
+    // Aso need to check for situations such as -5+3 or x*(-4+3) Anything NOT preceded by an x?
     const negativeRemover = /(^|[^x])-+/g;
     input = input.replace(negativeRemover, '$1');
 
@@ -354,7 +370,8 @@ const TokenType = Object.freeze({
     CLOSE_PARANTHESES: 2,
     VALUE: 3,
     ADDITION: 4,
-    MULTIPLICATION: 5
+    MULTIPLICATION: 5,
+    NEGATIVE: 6
 });
 
 /**
@@ -382,8 +399,11 @@ class Token {
         else if (token === ')') {
             this.tokenType = TokenType.CLOSE_PARANTHESES;
         }
-        else if (token === '+' || token === '-') {
+        else if (token === '+') {
             this.tokenType = TokenType.ADDITION;
+        }
+        else if (token === '-') {
+            this.tokenType = TokenType.NEGATIVE;
         }
         else if (token === '*' || token === '/') {
             this.tokenType = TokenType.MULTIPLICATION;
@@ -433,7 +453,7 @@ class TokenList {
 function tokenize(input) {
     console.log('Entering tokenize with input: ' + input);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
-    const tokenRetriever = /(\d+(\.\d+)?|[+\-*/x()])/; // must redo this to work with negative numbers. May have to do a lot of work.
+    const tokenRetriever = /((-)?\d+(\.\d+)?|[+\-*/x()])/;
     const tokenList = new TokenList();
 
     while (input.length) {
@@ -617,6 +637,13 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 startToken = startToken.next;
                 endToken = endToken.previous;
             }
+            else if (startToken.tokenType === TokenType.NEGATIVE) {
+                root.token = startToken;
+                root.createRightChild();
+                createParseTreeNodes(root.rightChild, ExpressionType.PEXP, startToken.next, endToken);
+                return;
+            }
+
             // Otherwise, we should have a single token and this token is set to it.
             else {
                 root.token = startToken;
@@ -685,7 +712,7 @@ function evaluateFunction(tree, x) {
         return Number(evaluateFunction(tree.leftChild, x)) + Number(evaluateFunction(tree.rightChild, x));
     }
     else if (tree.token.value === '-') {
-        return Number(evaluateFunction(tree.leftChild, x)) - Number(evaluateFunction(tree.rightChild, x));
+        return -1 * Number(evaluateFunction(tree.rightChild, x)); // Number(evaluateFunction(tree.leftChild, x))
     }
     else {
         if (tree.token.value === 'x') {
