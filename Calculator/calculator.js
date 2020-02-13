@@ -124,9 +124,9 @@ function createPolynomial(gl, tree) {
     const verticeArray = [];
 
     for (let x = -100; x <= 100; x++) {
-        const xi = x / 100;
+        const xi = x / 10;
         const yi = evaluateFunction(tree, xi);
-        verticeArray.push(xi, yi, 0.0);
+        verticeArray.push(xi / 10, yi / 10, 0.0);
     }
 
     console.log('Exiting createPolynomial');
@@ -721,3 +721,12 @@ function evaluateFunction(tree, x) {
         return tree.token.value;
     }
 }
+
+// NEXT STEPS:
+// Redo documentation for negative numbers
+// Implement .number
+// Enhance graphing when far enough in class (temporary fix to allow graphing larger functions?)
+// Implement powers
+// Implement trigonometry
+// Implement constants (e, pi)
+// Implement logs?

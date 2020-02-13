@@ -10,7 +10,7 @@ The files needed to run the program locally are contained in the *Calculator* fo
 - Handles implicit multiplication
 
 ### Limitations and workarounds:
-- Only graphs from -1 to 1 on the x and y axises
+- Only graphs from -10 to 10 on the x and y axises
 - Decimals starting with a . are not handled. Workaround: Type 0.32 instead of .32.
 - No trigonometry
 - No constants such as pi or e.
