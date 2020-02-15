@@ -227,14 +227,14 @@ function processFunction(func) {
 
     let tree = null;
 
-    if (!validateProperFunction(implicitAdditionString)) {
-        console.error('Invalid function!');
-    }
-    else {
-        tree = createParseTree(implicitAdditionString);
+    // if (validateProperFunction(implicitAdditionString)) {
+    //    console.error('Invalid function!');
+    // }
+    // else {
+    tree = createParseTree(implicitAdditionString);
 
-        console.log(evaluateFunction(tree, 1));
-    }
+    console.log(evaluateFunction(tree, 1));
+    // }
 
     console.log('Exiting processFunction');
 
@@ -310,7 +310,7 @@ function validateProperFunction(func) {
 
     console.log(input);
 
-    const invalidCharacters = /[^+\-*/x()]/g;
+    const invalidCharacters = /[^+\-*/x()^]/g;
     if (input.length === 0 || input.search(invalidCharacters) !== -1) {
         return false;
     }
@@ -371,7 +371,8 @@ const TokenType = Object.freeze({
     VALUE: 3,
     ADDITION: 4,
     MULTIPLICATION: 5,
-    NEGATIVE: 6
+    NEGATION: 6,
+    POWER: 7
 });
 
 /**
@@ -403,10 +404,13 @@ class Token {
             this.tokenType = TokenType.ADDITION;
         }
         else if (token === '-') {
-            this.tokenType = TokenType.NEGATIVE;
+            this.tokenType = TokenType.NEGATION;
         }
         else if (token === '*' || token === '/') {
             this.tokenType = TokenType.MULTIPLICATION;
+        }
+        else if (token === '^') {
+            this.tokenType = TokenType.POWER;
         }
 
         this.value = token;
@@ -453,7 +457,7 @@ class TokenList {
 function tokenize(input) {
     console.log('Entering tokenize with input: ' + input);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
-    const tokenRetriever = /((-)?\d+(\.\d+)?|[+\-*/x()])/;
+    const tokenRetriever = /(\d+(\.\d+)?|[+\-*/x()^])/;
     const tokenList = new TokenList();
 
     while (input.length) {
@@ -505,7 +509,7 @@ class TreeNode {
  * Enum to hold an expression type. Used for turning a function string into a tree.
  * Can be EXP (Expression), MEXP (Multiplication Expression), or PEXP (Parantheses Expression).
  */
-const ExpressionType = Object.freeze({ EXP: 1, MEXP: 2, PEXP: 3 });
+const ExpressionType = Object.freeze({ EXP: 1, MEXP: 2, NEXP: 3, EEXP: 4, PEXP: 5 });
 
 /**
  * Finds the token that the function parse tree should be split at. Searches from the endToken to the startToken
@@ -543,6 +547,28 @@ function findSplitToken(expressionType, startToken, endToken) {
         }
 
         currentToken = currentToken.previous;
+    }
+
+    return null;
+}
+
+function findEEXPSplitToken(startToken, endToken) {
+    let currentToken = startToken;
+
+    let closeParantheses = 0;
+
+    while (currentToken !== endToken && currentToken !== endToken.next) {
+        if (currentToken.tokenType === TokenType.POWER && closeParantheses === 0) {
+            return currentToken;
+        }
+        if (currentToken.tokenType === TokenType.OPEN_PARANTHESES) {
+            closeParantheses--;
+        }
+        else if (currentToken.tokenType === TokenType.CLOSE_PARANTHESES) {
+            closeParantheses++;
+        }
+
+        currentToken = currentToken.next;
     }
 
     return null;
@@ -617,15 +643,40 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
             // If no such token was found, switch to a PEXP expression and loop again (this helps to keep
             // unneccessary nodes from building up which would happen with a recursive call in this situation).
             if (mToken == null) {
-                expressionType = ExpressionType.PEXP;
+                expressionType = ExpressionType.NEXP;
             }
             else {
                 // Recursively repeat this process for the left and right children and set the token to the split token.
                 root.createLeftChild();
                 root.createRightChild();
                 createParseTreeNodes(root.leftChild, ExpressionType.MEXP, startToken, mToken.previous);
-                createParseTreeNodes(root.rightChild, ExpressionType.PEXP, mToken.next, endToken);
+                createParseTreeNodes(root.rightChild, ExpressionType.NEXP, mToken.next, endToken);
                 root.token = mToken;
+                return;
+            }
+        }
+        else if (expressionType === ExpressionType.NEXP) {
+            if (startToken.tokenType === TokenType.NEGATION) {
+                root.token = startToken;
+                root.createRightChild();
+                createParseTreeNodes(root.rightChild, ExpressionType.NEXP, startToken.next, endToken);
+                return;
+            }
+            else {
+                expressionType = ExpressionType.EEXP;
+            }
+        }
+        else if (expressionType === ExpressionType.EEXP) {
+            const eToken = findEEXPSplitToken(startToken, endToken);
+            if (eToken == null) {
+                expressionType = ExpressionType.PEXP;
+            }
+            else {
+                root.createLeftChild();
+                root.createRightChild();
+                createParseTreeNodes(root.leftChild, expressionType.PEXP, startToken, eToken.previous);
+                createParseTreeNodes(root.rightChild, expressionType.PEXP, eToken.next, endToken);
+                root.token = eToken;
                 return;
             }
         }
@@ -637,13 +688,6 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 startToken = startToken.next;
                 endToken = endToken.previous;
             }
-            else if (startToken.tokenType === TokenType.NEGATIVE) {
-                root.token = startToken;
-                root.createRightChild();
-                createParseTreeNodes(root.rightChild, ExpressionType.PEXP, startToken.next, endToken);
-                return;
-            }
-
             // Otherwise, we should have a single token and this token is set to it.
             else {
                 root.token = startToken;
@@ -713,6 +757,9 @@ function evaluateFunction(tree, x) {
     }
     else if (tree.token.value === '-') {
         return -1 * Number(evaluateFunction(tree.rightChild, x)); // Number(evaluateFunction(tree.leftChild, x))
+    }
+    else if (tree.token.value === '^') {
+        return Math.pow(Number(evaluateFunction(tree.leftChild, x)), Number(evaluateFunction(tree.rightChild, x)));
     }
     else {
         if (tree.token.value === 'x') {
