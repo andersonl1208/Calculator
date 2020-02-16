@@ -674,8 +674,8 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
             else {
                 root.createLeftChild();
                 root.createRightChild();
-                createParseTreeNodes(root.leftChild, expressionType.PEXP, startToken, eToken.previous);
-                createParseTreeNodes(root.rightChild, expressionType.PEXP, eToken.next, endToken);
+                createParseTreeNodes(root.leftChild, ExpressionType.PEXP, startToken, eToken.previous);
+                createParseTreeNodes(root.rightChild, ExpressionType.EEXP, eToken.next, endToken);
                 root.token = eToken;
                 return;
             }
@@ -770,10 +770,11 @@ function evaluateFunction(tree, x) {
 }
 
 // NEXT STEPS:
-// Redo documentation for negative numbers
-// Implement .number
-// Enhance graphing when far enough in class (temporary fix to allow graphing larger functions?)
-// Implement powers
+// Redo documentation for negative numbers and powers
+// Implement powers into validateProperFunction
+// Write documentation for validateProperFunction
 // Implement trigonometry
+// Implement .number
+// Enhance graphing when far enough in class
 // Implement constants (e, pi)
 // Implement logs?
