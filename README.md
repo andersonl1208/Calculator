@@ -9,11 +9,11 @@ The files needed to run the program locally are contained in the *Calculator* fo
 - Graphs polynomials
 - Handles implicit multiplication
 - Handles addition, subtraction, multiplication, division, powers, parentheses, cos, sin, tan, acos, asin, and atan.
+- Handles constants e and pi
 
 ### Limitations and workarounds:
 - Only graphs from -10 to 10 on the x and y axises
 - Decimals starting with a . are not handled. Workaround: Type 0.32 instead of .32.
 - No hyperbolic functions
-- No constants such as pi or e.
 - x is the only variable
 - No way to evaluate a function at a point / Calculate an answer (It only graphs the function)

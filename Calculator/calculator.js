@@ -277,7 +277,7 @@ function removeWhitespace(input) {
  * @returns {string} The function with multiplication symbols added wherever implicit multiplication occured.
  */
 function handleImplicitMultiplication(func) {
-    return func.replace(/(\)|x|\d(?=\D))(?=\(|x|\d|c|s|t)/g, '$1*');
+    return func.replace(/(\)|x|pi|e|\d(?=\D))(?=\(|x|\d|c|s|t|a|p|e)/g, '$1*');
 }
 
 /**
@@ -315,7 +315,7 @@ function validateProperFunction(func) {
     console.log('Entering validateProperFunction with function: ' + func);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
     // Also neeed to consider negative numbers more.
-    const numberRemover = /\d+(\.\d+)?/g;
+    const numberRemover = /\d+(\.\d+)?|e|pi/g;
     let input = func.replace(numberRemover, 'x');
 
     // Check for any number of negatives directly preceded by a *, /, + and remove them.
@@ -480,7 +480,7 @@ class TokenList {
 function tokenize(input) {
     console.log('Entering tokenize with input: ' + input);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
-    const tokenRetriever = /(\d+(\.\d+)?|a?(sin|cos|tan)\(|[+\-*/x()^])/;
+    const tokenRetriever = /(\d+(\.\d+)?|e|pi|a?(sin|cos|tan)\(|[+\-*/x()^])/;
     const tokenList = new TokenList();
 
     while (input.length) {
@@ -815,6 +815,13 @@ function evaluateFunction(tree, x) {
         if (tree.value === 'x') {
             return x;
         }
+        else if (tree.value === 'e') {
+            return Math.E;
+        }
+        else if (tree.value === 'pi') {
+            return Math.PI;
+        }
+
         return tree.value;
     }
 }
@@ -826,5 +833,8 @@ function evaluateFunction(tree, x) {
 // Implement more trigonometry
 // Implement .number
 // Enhance graphing when far enough in class
-// Implement constants (e, pi)
-// Implement logs?
+// Implement logs
+// Implement absolute value
+// Implement floor and ceiling?
+// Implement hyperbolics?
+// Implement sqrt?
