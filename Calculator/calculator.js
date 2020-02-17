@@ -675,7 +675,7 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 root.createLeftChild();
                 root.createRightChild();
                 createParseTreeNodes(root.leftChild, ExpressionType.PEXP, startToken, eToken.previous);
-                createParseTreeNodes(root.rightChild, ExpressionType.EEXP, eToken.next, endToken);
+                createParseTreeNodes(root.rightChild, ExpressionType.NEXP, eToken.next, endToken);
                 root.token = eToken;
                 return;
             }
