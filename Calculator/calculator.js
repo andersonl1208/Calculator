@@ -323,6 +323,9 @@ function validateProperFunction(func) {
     const negativeRemover = /(^|[^x])-+/g;
     input = input.replace(negativeRemover, '$1');
 
+    const trigonometryRemover = /a?(cos|sin|tan)\(/g;
+    input = input.replace(trigonometryRemover, '(');
+
     console.log(input);
 
     const invalidCharacters = /[^+\-*/x()^]/g;
@@ -429,9 +432,10 @@ class Token {
         else if (token === '^') {
             this.tokenType = TokenType.POWER;
         }
-        else if (token === 'cos(' || token === 'sin(' || token === 'tan(') {
+        else if (token === 'cos(' || token === 'sin(' || token === 'tan(' || token === 'acos(' || token === 'asin(' ||
+                    token === 'atan(') {
             this.tokenType = TokenType.TRIGONOMETRY;
-            this.value = token.charAt(0);
+            this.value = token.substr(0, 2);
         }
     }
 }
@@ -476,7 +480,7 @@ class TokenList {
 function tokenize(input) {
     console.log('Entering tokenize with input: ' + input);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
-    const tokenRetriever = /(\d+(\.\d+)?|(sin|cos|tan)\(|[+\-*/x()^])/;
+    const tokenRetriever = /(\d+(\.\d+)?|a?(sin|cos|tan)\(|[+\-*/x()^])/;
     const tokenList = new TokenList();
 
     while (input.length) {
@@ -745,7 +749,7 @@ function createParseTree(input) {
  * Returns a string representation of the parse tree. Intended for testing that the parse tree was created
  * correctly. Searches from the left to the right and prints each token value it finds.
  *
- * @param {*} tree The tree to print.
+ * @param {TreeNode} tree The root node of the tree to print.
  *
  * @return {string} Representation of the parse tree.
  */
@@ -789,14 +793,23 @@ function evaluateFunction(tree, x) {
     else if (tree.value === '^') {
         return Math.pow(Number(evaluateFunction(tree.leftChild, x)), Number(evaluateFunction(tree.rightChild, x)));
     }
-    else if (tree.value === 'c') {
+    else if (tree.value === 'co') {
         return Math.cos(Number(evaluateFunction(tree.rightChild, x)));
     }
-    else if (tree.value === 's') {
+    else if (tree.value === 'si') {
         return Math.sin(Number(evaluateFunction(tree.rightChild, x)));
     }
-    else if (tree.value === 't') {
+    else if (tree.value === 'ta') {
         return Math.tan(Number(evaluateFunction(tree.rightChild, x)));
+    }
+    else if (tree.value === 'ac') {
+        return Math.acos(Number(evaluateFunction(tree.rightChild, x)));
+    }
+    else if (tree.value === 'as') {
+        return Math.asin(Number(evaluateFunction(tree.rightChild, x)));
+    }
+    else if (tree.value === 'at') {
+        return Math.atan(Number(evaluateFunction(tree.rightChild, x)));
     }
     else {
         if (tree.value === 'x') {
