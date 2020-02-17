@@ -277,7 +277,7 @@ function removeWhitespace(input) {
  * @returns {string} The function with multiplication symbols added wherever implicit multiplication occured.
  */
 function handleImplicitMultiplication(func) {
-    return func.replace(/(\)|x|pi|e|\d(?=\D))(?=\(|x|\d|c|s|t|a|p|e)/g, '$1*');
+    return func.replace(/(\)|x|pi|e|\d(?=\D))(?=\(|x|\d|c|s|t|a|p|e|l)/g, '$1*');
 }
 
 /**
@@ -323,8 +323,8 @@ function validateProperFunction(func) {
     const negativeRemover = /(^|[^x])-+/g;
     input = input.replace(negativeRemover, '$1');
 
-    const trigonometryRemover = /a?(cos|sin|tan)\(/g;
-    input = input.replace(trigonometryRemover, '(');
+    const enhancedParanthesesRemover = /((a?(cos|sin|tan))|ln|log)\(/g;
+    input = input.replace(enhancedParanthesesRemover, '(');
 
     console.log(input);
 
@@ -391,7 +391,7 @@ const TokenType = Object.freeze({
     MULTIPLICATION: 5,
     NEGATION: 6,
     POWER: 7,
-    TRIGONOMETRY: 8
+    E_OPEN_PARANTHESES: 8
 });
 
 /**
@@ -433,8 +433,8 @@ class Token {
             this.tokenType = TokenType.POWER;
         }
         else if (token === 'cos(' || token === 'sin(' || token === 'tan(' || token === 'acos(' || token === 'asin(' ||
-                    token === 'atan(') {
-            this.tokenType = TokenType.TRIGONOMETRY;
+                    token === 'atan(' || token === 'log(' || token === 'ln(') {
+            this.tokenType = TokenType.E_OPEN_PARANTHESES;
             this.value = token.substr(0, 2);
         }
     }
@@ -480,13 +480,17 @@ class TokenList {
 function tokenize(input) {
     console.log('Entering tokenize with input: ' + input);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
-    const tokenRetriever = /(\d+(\.\d+)?|e|pi|a?(sin|cos|tan)\(|[+\-*/x()^])/;
+    const tokenRetriever = /(\d+(\.\d+)?|e|pi|a?(sin|cos|tan)\(|(ln|log)\(|[+\-*/x()^])/;
     const tokenList = new TokenList();
 
     while (input.length) {
         let token = '';
         input = input.replace(tokenRetriever, (matchedString, savedToken) => { token = savedToken; return ''; });
         tokenList.add(new Token(token));
+        if (token === '') {
+            console.error('Invalid character found when tokenizing');
+            break;
+        }
     }
 
     console.log('Exiting tokenize');
@@ -563,7 +567,7 @@ function findSplitToken(expressionType, startToken, endToken) {
             return currentToken;
         }
         if (currentToken.tokenType === TokenType.OPEN_PARANTHESES ||
-            currentToken.tokenType === TokenType.TRIGONOMETRY) {
+            currentToken.tokenType === TokenType.E_OPEN_PARANTHESES) {
             closeParantheses--;
         }
         else if (currentToken.tokenType === TokenType.CLOSE_PARANTHESES) {
@@ -586,7 +590,7 @@ function findEEXPSplitToken(startToken, endToken) {
             return currentToken;
         }
         if (currentToken.tokenType === TokenType.OPEN_PARANTHESES ||
-            currentToken.tokenType === TokenType.TRIGONOMETRY) {
+            currentToken.tokenType === TokenType.E_OPEN_PARANTHESES) {
             closeParantheses--;
         }
         else if (currentToken.tokenType === TokenType.CLOSE_PARANTHESES) {
@@ -713,7 +717,7 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 startToken = startToken.next;
                 endToken = endToken.previous;
             }
-            else if (startToken.tokenType === TokenType.TRIGONOMETRY) {
+            else if (startToken.tokenType === TokenType.E_OPEN_PARANTHESES) {
                 root.createRightChild();
                 createParseTreeNodes(root.rightChild, ExpressionType.EXP, startToken.next, endToken.previous);
                 root.value = startToken.value;
@@ -811,6 +815,12 @@ function evaluateFunction(tree, x) {
     else if (tree.value === 'at') {
         return Math.atan(Number(evaluateFunction(tree.rightChild, x)));
     }
+    else if (tree.value === 'ln') {
+        return Math.log(Number(evaluateFunction(tree.rightChild, x)));
+    }
+    else if (tree.value === 'lo') {
+        return Math.log10(Number(evaluateFunction(tree.rightChild, x)));
+    }
     else {
         if (tree.value === 'x') {
             return x;
@@ -833,7 +843,6 @@ function evaluateFunction(tree, x) {
 // Implement more trigonometry
 // Implement .number
 // Enhance graphing when far enough in class
-// Implement logs
 // Implement absolute value
 // Implement floor and ceiling?
 // Implement hyperbolics?

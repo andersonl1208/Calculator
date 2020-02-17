@@ -8,7 +8,9 @@ The files needed to run the program locally are contained in the *Calculator* fo
 ### Functionality:
 - Graphs polynomials
 - Handles implicit multiplication
-- Handles addition, subtraction, multiplication, division, powers, parentheses, cos, sin, tan, acos, asin, and atan.
+- Handles addition, subtraction, multiplication, division, powers, and parentheses.
+- Handles trigonometric functions cos, sin, tan, acos, asin, and atan.
+- Handles logarithms log and ln.
 - Handles constants e and pi
 
 ### Limitations and workarounds:
