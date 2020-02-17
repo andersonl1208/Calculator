@@ -94,9 +94,11 @@ function draw(tree) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     const axisBuffer = createAxises(gl);
+    const tickMarkBuffer = createTickMarks(gl, 20, 20);
     const polynomialBuffer = createPolynomial(gl, tree);
 
     drawLines(gl, axisBuffer, axisShader);
+    drawLines(gl, tickMarkBuffer, axisShader);
     drawLineStrip(gl, polynomialBuffer, purpleFragmentShaderSource);
 }
 
@@ -151,6 +153,19 @@ function createAxises(gl) {
         0, -1, 0
     ];
     return makeStaticDrawArrayBuffer(gl, verticeArray, numVertices);
+}
+
+function createTickMarks(gl, numX, numY) {
+    const verticeArray = [];
+
+    for (let i = 0; i < numX; i++) {
+        verticeArray.push(2 / numX * i - 1, -0.02, 0, 2 / numX * i - 1, 0.02, 0);
+    }
+
+    for (let j = 0; j <= numY; j++) {
+        verticeArray.push(-0.02, 2 / numY * j - 1, 0, 0.02, 2 / numY * j - 1, 0);
+    }
+    return makeStaticDrawArrayBuffer(gl, verticeArray, 2 * (numX + numY));
 }
 
 /**
