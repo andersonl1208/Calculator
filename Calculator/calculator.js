@@ -277,7 +277,7 @@ function removeWhitespace(input) {
  * @returns {string} The function with multiplication symbols added wherever implicit multiplication occured.
  */
 function handleImplicitMultiplication(func) {
-    return func.replace(/(\)|x|\d(?=\D))(?=\(|x|\d)/g, '$1*');
+    return func.replace(/(\)|x|\d(?=\D))(?=\(|x|\d|c|s|t)/g, '$1*');
 }
 
 /**
@@ -387,7 +387,8 @@ const TokenType = Object.freeze({
     ADDITION: 4,
     MULTIPLICATION: 5,
     NEGATION: 6,
-    POWER: 7
+    POWER: 7,
+    TRIGONOMETRY: 8
 });
 
 /**
@@ -405,6 +406,7 @@ class Token {
      * @param {string} token The token to set the value property to and that is used to determine the tokenType.
      */
     constructor(token) {
+        this.value = token;
         this.next = null;
         this.previous = null;
         this.tokenType = TokenType.VALUE;
@@ -427,8 +429,10 @@ class Token {
         else if (token === '^') {
             this.tokenType = TokenType.POWER;
         }
-
-        this.value = token;
+        else if (token === 'cos(' || token === 'sin(' || token === 'tan(') {
+            this.tokenType = TokenType.TRIGONOMETRY;
+            this.value = token.charAt(0);
+        }
     }
 }
 
@@ -472,7 +476,7 @@ class TokenList {
 function tokenize(input) {
     console.log('Entering tokenize with input: ' + input);
     // This may need additional work. It fails for .32 or something similar (must do 0.32).
-    const tokenRetriever = /(\d+(\.\d+)?|[+\-*/x()^])/;
+    const tokenRetriever = /(\d+(\.\d+)?|(sin|cos|tan)\(|[+\-*/x()^])/;
     const tokenList = new TokenList();
 
     while (input.length) {
@@ -486,16 +490,16 @@ function tokenize(input) {
 }
 
 /**
- * Class representing a node of a binary tree with a token. Contains token, leftChild, rightChild,
+ * Class representing a node of a binary tree with a token. Contains value, leftChild, rightChild,
  * and parent properties, as well as createLeftChild and createRightChild functions. Left child,
  * right child, and parent properties are automatically set and should usually only be gotten.
  */
 class TreeNode {
     /**
-     * Initializes the token, leftChild, rightChild, and parent variables to null.
+     * Initializes the value, leftChild, rightChild, and parent variables to null.
      */
     constructor() {
-        this.token = null;
+        this.value = null;
         this.leftChild = null;
         this.rightChild = null;
         this.parent = null;
@@ -554,7 +558,8 @@ function findSplitToken(expressionType, startToken, endToken) {
         if (currentToken.tokenType === tokenType && closeParantheses === 0) {
             return currentToken;
         }
-        if (currentToken.tokenType === TokenType.OPEN_PARANTHESES) {
+        if (currentToken.tokenType === TokenType.OPEN_PARANTHESES ||
+            currentToken.tokenType === TokenType.TRIGONOMETRY) {
             closeParantheses--;
         }
         else if (currentToken.tokenType === TokenType.CLOSE_PARANTHESES) {
@@ -576,7 +581,8 @@ function findEEXPSplitToken(startToken, endToken) {
         if (currentToken.tokenType === TokenType.POWER && closeParantheses === 0) {
             return currentToken;
         }
-        if (currentToken.tokenType === TokenType.OPEN_PARANTHESES) {
+        if (currentToken.tokenType === TokenType.OPEN_PARANTHESES ||
+            currentToken.tokenType === TokenType.TRIGONOMETRY) {
             closeParantheses--;
         }
         else if (currentToken.tokenType === TokenType.CLOSE_PARANTHESES) {
@@ -648,7 +654,7 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 root.createRightChild();
                 createParseTreeNodes(root.leftChild, ExpressionType.EXP, startToken, aToken.previous);
                 createParseTreeNodes(root.rightChild, ExpressionType.MEXP, aToken.next, endToken);
-                root.token = aToken;
+                root.value = aToken.value;
                 return;
             }
         }
@@ -666,13 +672,13 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 root.createRightChild();
                 createParseTreeNodes(root.leftChild, ExpressionType.MEXP, startToken, mToken.previous);
                 createParseTreeNodes(root.rightChild, ExpressionType.NEXP, mToken.next, endToken);
-                root.token = mToken;
+                root.value = mToken.value;
                 return;
             }
         }
         else if (expressionType === ExpressionType.NEXP) {
             if (startToken.tokenType === TokenType.NEGATION) {
-                root.token = startToken;
+                root.value = startToken.value;
                 root.createRightChild();
                 createParseTreeNodes(root.rightChild, ExpressionType.NEXP, startToken.next, endToken);
                 return;
@@ -691,7 +697,7 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 root.createRightChild();
                 createParseTreeNodes(root.leftChild, ExpressionType.PEXP, startToken, eToken.previous);
                 createParseTreeNodes(root.rightChild, ExpressionType.NEXP, eToken.next, endToken);
-                root.token = eToken;
+                root.value = eToken.value;
                 return;
             }
         }
@@ -703,9 +709,15 @@ function createParseTreeNodes(root, expressionType, startToken, endToken) {
                 startToken = startToken.next;
                 endToken = endToken.previous;
             }
+            else if (startToken.tokenType === TokenType.TRIGONOMETRY) {
+                root.createRightChild();
+                createParseTreeNodes(root.rightChild, ExpressionType.EXP, startToken.next, endToken.previous);
+                root.value = startToken.value;
+                return;
+            }
             // Otherwise, we should have a single token and this token is set to it.
             else {
-                root.token = startToken;
+                root.value = startToken.value;
                 return;
             }
         }
@@ -742,7 +754,7 @@ function printParseTree(tree) {
         return '';
     }
 
-    return printParseTree(tree.leftChild) + tree.token.value + printParseTree(tree.rightChild);
+    return printParseTree(tree.leftChild) + tree.value + printParseTree(tree.rightChild);
 }
 
 /**
@@ -753,10 +765,11 @@ function printParseTree(tree) {
  * @return {Number} f(x) (the answer to the function at x).
  */
 function evaluateFunction(tree, x) {
-    if (tree.token.value === '*') {
+    // Should make this into a switch
+    if (tree.value === '*') {
         return Number(evaluateFunction(tree.leftChild, x)) * Number(evaluateFunction(tree.rightChild, x));
     }
-    else if (tree.token.value === '/') {
+    else if (tree.value === '/') {
         const numerator = Number(evaluateFunction(tree.leftChild, x));
         const denominator = Number(evaluateFunction(tree.rightChild, x));
         if (denominator === 0) {
@@ -767,20 +780,29 @@ function evaluateFunction(tree, x) {
         }
         return numerator / denominator;
     }
-    else if (tree.token.value === '+') {
+    else if (tree.value === '+') {
         return Number(evaluateFunction(tree.leftChild, x)) + Number(evaluateFunction(tree.rightChild, x));
     }
-    else if (tree.token.value === '-') {
+    else if (tree.value === '-') {
         return -1 * Number(evaluateFunction(tree.rightChild, x)); // Number(evaluateFunction(tree.leftChild, x))
     }
-    else if (tree.token.value === '^') {
+    else if (tree.value === '^') {
         return Math.pow(Number(evaluateFunction(tree.leftChild, x)), Number(evaluateFunction(tree.rightChild, x)));
     }
+    else if (tree.value === 'c') {
+        return Math.cos(Number(evaluateFunction(tree.rightChild, x)));
+    }
+    else if (tree.value === 's') {
+        return Math.sin(Number(evaluateFunction(tree.rightChild, x)));
+    }
+    else if (tree.value === 't') {
+        return Math.tan(Number(evaluateFunction(tree.rightChild, x)));
+    }
     else {
-        if (tree.token.value === 'x') {
+        if (tree.value === 'x') {
             return x;
         }
-        return tree.token.value;
+        return tree.value;
     }
 }
 
@@ -788,7 +810,7 @@ function evaluateFunction(tree, x) {
 // Redo documentation for negative numbers and powers
 // Implement powers into validateProperFunction
 // Write documentation for validateProperFunction
-// Implement trigonometry
+// Implement more trigonometry
 // Implement .number
 // Enhance graphing when far enough in class
 // Implement constants (e, pi)
