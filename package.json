@@ -1,9 +1,11 @@
 {
   "name": "calculator",
-  "version": "1.0.0",
-  "description": "��C\u0000a\u0000l\u0000c\u0000u\u0000l\u0000a\u0000t\u0000o\u0000r\u0000 \u0000p\u0000r\u0000o\u0000g\u0000r\u0000a\u0000m\u0000\r\u0000 \u0000",
+  "version": "2.0.0",
+  "description": "Basic graphing calculator program",
   "main": "calculator.js",
+  "type": "module",
   "scripts": {
+    "start": "electron ./client/electron/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,11 +20,13 @@
   "homepage": "https://github.com/andersonl1208/Calculator#readme",
   "dependencies": {},
   "devDependencies": {
+    "electron": "^8.2.3",
     "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-node": "^11.0.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.1"
   }
 }
