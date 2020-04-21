@@ -1,4 +1,11 @@
+const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer')
 const { app, BrowserWindow } = require('electron')
+
+app.whenReady().then(() => {
+  installExtension(REACT_DEVELOPER_TOOLS)
+    .then((name) => console.log(`Added Extension:  ${name}`))
+    .catch((err) => console.log('An error occurred: ', err))
+})
 
 function createWindow () {
   // Create the browser window.
@@ -11,7 +18,8 @@ function createWindow () {
   })
 
   // and load the index.html of the app.
-  win.loadFile('../calculator.html')
+  // win.loadFile('../calculator.html')
+  win.loadURL('http://localhost:3000/calculator.html')
 
   // Open the DevTools.
   win.webContents.openDevTools()

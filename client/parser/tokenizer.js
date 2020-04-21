@@ -1,6 +1,6 @@
-import TokenList from './TokenList.mjs'
-import Token from './Token.mjs'
-import ExpressionType from './ExpressionType.mjs'
+import TokenList from './TokenList.js'
+import Token from './Token.js'
+import ExpressionType from './ExpressionType.js'
 import TokenType from './TokenType.js'
 
 /**

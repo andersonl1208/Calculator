@@ -3,30 +3,56 @@
   "version": "2.0.0",
   "description": "Basic graphing calculator program",
   "main": "calculator.js",
-  "type": "module",
   "scripts": {
     "start": "electron ./client/electron/main.js",
+    "server": "babel-node server/app.js",
+    "client": "webpack --mode production",
+    "serverdev": "nodemon server/app.js",
+    "clientdev": "webpack --mode development --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andersonl1208/Calculator.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Luke Anderson",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/andersonl1208/Calculator/issues"
   },
   "homepage": "https://github.com/andersonl1208/Calculator#readme",
-  "dependencies": {},
+  "dependencies": {
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "express": "^4.17.1",
+    "minimist": "^1.2.5",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
+    "@babel/plugin-transform-async-to-generator": "^7.8.3",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-react": "^7.9.4",
+    "babel-loader": "^8.1.0",
+    "babel-preset-minify": "^0.5.1",
+    "css-loader": "^3.5.2",
     "electron": "^8.2.3",
+    "electron-devtools-installer": "^3.0.0",
+    "electron-react-devtools": "^0.5.3",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.19.0",
-    "eslint-plugin-standard": "^4.0.1"
+    "eslint-plugin-standard": "^4.0.1",
+    "html-webpack-plugin": "^4.2.0",
+    "nodemon": "^2.0.3",
+    "style-loader": "^1.1.4",
+    "url-loader": "^4.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   }
 }

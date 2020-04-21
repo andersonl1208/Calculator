@@ -1,7 +1,7 @@
-import { tokenize, findEEXPSplitToken, findSplitToken } from './tokenizer.mjs'
-import ExpressionType from './ExpressionType.mjs'
+import { tokenize, findEEXPSplitToken, findSplitToken } from './tokenizer.js'
+import ExpressionType from './ExpressionType.js'
 import TokenType from './TokenType.js'
-import TreeNode from './TreeNode.mjs'
+import TreeNode from './TreeNode.js'
 
 /**
  * Creates a parse tree for a tokenized function. It should be read from the bottom-left to the top-right.

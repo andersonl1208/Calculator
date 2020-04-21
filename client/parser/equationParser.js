@@ -1,6 +1,6 @@
-import createParseTree from './parseTree.mjs'
-import processImplicit from './implicit.mjs'
-import validateFunction from './validateFunction.mjs'
+import createParseTree from './parseTree.js'
+import processImplicit from './implicit.js'
+import validateFunction from './validateFunction.js'
 
 /**
  * Processes a string containing a function. Removes whitespace, handles implicit multiplication, checks
@@ -13,25 +13,28 @@ import validateFunction from './validateFunction.mjs'
  */
 function processFunction (func) {
   console.log('Entering processFunction')
+  try {
+    const implicitAddedFunc = processImplicit(func)
 
-  const implicitAddedFunc = processImplicit(func)
+    // document.getElementById('result').innerHTML = implicitAddedFunc
 
-  document.getElementById('result').innerHTML = implicitAddedFunc
+    let tree = null
 
-  let tree = null
-
-  if (validateFunction(implicitAddedFunc)) {
-    console.error('Invalid function!')
-  } else {
+    //   if (validateFunction(implicitAddedFunc)) {
+    //     console.error('Invalid function!')
+    //   } else {
     tree = createParseTree(implicitAddedFunc)
 
     console.log(evaluateFunction(tree, 1))
+    //   }
+
+    console.log('Exiting processFunction')
+    return tree
+  } catch (e) {
+    console.log(`Process function failed for ${func}`)
+    console.log(e)
+    return null
   }
-
-  console.log('Exiting processFunction')
-
-  return tree
-
   // convert to lowercase? Depends on if we replace things like cos() with some temporary var
 }
 

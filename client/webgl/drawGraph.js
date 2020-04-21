@@ -1,4 +1,4 @@
-import { processFunction, evaluateFunction } from '../parser/equationParser.mjs'
+import { processFunction, evaluateFunction } from '../parser/equationParser.js'
 
 /* eslint no-unused-vars: ["warn",{ "varsIgnorePattern": "graphFunction"}] */
 
@@ -82,26 +82,29 @@ function makeProgram (gl, vertexSource, fragmentSource) {
 /**
  *
  */
-function draw (tree) {
-  const drawWindow = document.getElementById('screen')
+function draw (tree, drawWindow) {
+  try {
+    /** @type {WebGLRenderingContext} */
+    const gl = drawWindow.getContext('webgl')
 
-  /** @type {WebGLRenderingContext} */
-  const gl = drawWindow.getContext('webgl')
+    drawWindow.width = drawWindow.clientWidth
+    drawWindow.height = drawWindow.clientHeight
+    gl.viewport(0, 0, drawWindow.width, drawWindow.height)
 
-  drawWindow.width = drawWindow.clientWidth
-  drawWindow.height = drawWindow.clientHeight
-  gl.viewport(0, 0, drawWindow.width, drawWindow.height)
+    gl.clearColor(1.0, 1.0, 1.0, 1)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-  gl.clearColor(1.0, 1.0, 1.0, 1)
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    const axisBuffer = createAxises(gl)
+    const tickMarkBuffer = createTickMarks(gl, 20, 20)
+    const polynomialBuffer = createPolynomial(gl, tree)
 
-  const axisBuffer = createAxises(gl)
-  const tickMarkBuffer = createTickMarks(gl, 20, 20)
-  const polynomialBuffer = createPolynomial(gl, tree)
-
-  drawLines(gl, axisBuffer, axisShader)
-  drawLines(gl, tickMarkBuffer, axisShader)
-  drawLineStrip(gl, polynomialBuffer, purpleFragmentShaderSource)
+    drawLines(gl, axisBuffer, axisShader)
+    drawLines(gl, tickMarkBuffer, axisShader)
+    drawLineStrip(gl, polynomialBuffer, purpleFragmentShaderSource)
+  } catch (e) {
+    console.error(`Draw failed with drawWindow ${drawWindow}`)
+    console.error(e)
+  }
 }
 
 function makeStaticDrawArrayBuffer (gl, verticeArray, numVertices) {
@@ -215,11 +218,16 @@ function drawLineStrip (gl, data, fragmentShaderSource) {
 /**
  * Called when the user clicks the graph function button. Processes and draws the function if it is valid.
  */
-function graphFunction () {
-  const tree = processFunction(document.getElementById('userString').value)
-  if (tree !== null) {
-    draw(tree)
+function graphFunction (func, drawWindow) {
+  try {
+    const tree = processFunction(func)
+    if (tree !== null) {
+      draw(tree, drawWindow)
+    }
+  } catch (e) {
+    console.error(`Graph function failed for ${func} with drawWindow ${drawWindow}`)
+    console.error(e)
   }
 }
 
-// export default graphFunction
+export default graphFunction
