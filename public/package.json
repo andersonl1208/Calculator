@@ -1,0 +1,9 @@
+{
+  "name": "calculator",
+  "productName": "graphing-calculator",
+  "version": "2.0.11",
+  "description": "Basic graphing calculator program",
+  "main": "electron.bundle.js",
+  "author": "Luke Anderson",
+  "license": "MIT"
+}
