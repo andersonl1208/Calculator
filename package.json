@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/andersonl1208/Calculator#readme",
   "dependencies": {
+    "@material-ui/core": "^4.9.12",
+    "@material-ui/icons": "^4.9.1",
     "express": "^4.17.1",
     "minimist": "^1.2.5",
     "react": "^16.13.1",

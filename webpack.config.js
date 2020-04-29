@@ -46,7 +46,7 @@ const electronConfig = (env, argv) => {
   // Add minification of files when in production mode
   if (argv.mode === 'production') {
     config.module.rules[0].use.options.presets.push('minify')
-    // config.module.rules[0].use.options.plugins.push('transform-remove-console')
+    config.module.rules[0].use.options.plugins.push('transform-remove-console')
   }
 
   // Enable extra development mode options (source maps and the dev server)
@@ -86,7 +86,7 @@ const clientConfig = (env, argv) => {
     // Rules for processing all included files
     module: {
       rules: [{
-        // CSS files: Transpiles to JSS, needed for Bootstrap, may be removable here
+        // CSS files: Transpiles to JSS
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
       }, {
@@ -109,13 +109,6 @@ const clientConfig = (env, argv) => {
       new HtmlWebpackPlugin({
         template: path.join(__dirname, 'client/calculator.html'),
         filename: path.join(__dirname, 'public/calculator.html')
-      }),
-      // Add global references to jquery and popper (for Bootstrap), may be removable
-      new webpack.ProvidePlugin({
-        $: 'jquery',
-        jQuery: 'jquery',
-        'window.jQuery': 'jquery',
-        Popper: ['popper.js', 'default']
       })
     ]
   }
@@ -123,7 +116,7 @@ const clientConfig = (env, argv) => {
   // Add minification of files when in production mode
   if (argv.mode === 'production') {
     config.module.rules[1].use.options.presets.push('minify')
-    // config.module.rules[1].use.options.plugins.push('transform-remove-console')
+    config.module.rules[1].use.options.plugins.push('transform-remove-console')
   }
 
   // Enable extra development mode options (source maps and the dev server)

@@ -21,6 +21,10 @@
     "plugins": [
         "react"
     ],
+    "ignorePatterns": [
+      "public/",
+      "builds/"
+    ],
     "rules": {
         "import/no-unresolved": [2],
         "indent": "warn",

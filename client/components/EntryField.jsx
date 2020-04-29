@@ -4,13 +4,15 @@
 //     <div id="result"></div><br/>
 
 import React from 'react'
+import PropTypes from 'prop-types'
 
-class EntryField extends React.Component {
-  render () {
-    return (
-      <textarea rows="5" cols="85" value={this.props.currentEntry} onChange={this.props.onEntryChange}></textarea>
-    )
-  }
+export default function EntryField (props) {
+  return (
+    <textarea rows="5" cols="85" value={props.currentEntry} onChange={props.onEntryChange}></textarea>
+  )
 }
 
-export default EntryField
+EntryField.propTypes = {
+  currentEntry: PropTypes.string,
+  onEntryChange: PropTypes.func
+}

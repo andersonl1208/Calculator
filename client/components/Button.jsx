@@ -6,12 +6,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-class Button extends React.Component {
-  render () {
-    return (
-      <button type="button" onClick={this.props.onclick}>{this.props.name}</button>
-    )
-  }
+export default function Button (props) {
+  return (
+    <button type="button" onClick={props.onclick}>{props.name}</button>
+  )
 }
 
 Button.propTypes = {
@@ -23,5 +21,3 @@ Button.defaultProps = {
   name: '',
   onclick: (e) => { e.preventDefault() }
 }
-
-export default Button

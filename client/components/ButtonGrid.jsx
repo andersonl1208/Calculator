@@ -6,12 +6,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-class ButtonGrid extends React.Component {
-  render () {
-    return (
-      <div></div>
-    )
-  }
+export default function ButtonGrid () {
+  return (
+    <div></div>
+  )
 }
 
 ButtonGrid.propTypes = {
@@ -22,5 +20,3 @@ ButtonGrid.propTypes = {
 ButtonGrid.defaultProps = {
   title: 'Banner Title'
 }
-
-export default ButtonGrid

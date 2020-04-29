@@ -33,8 +33,6 @@ function createWindow () {
     })
   }
 
-  // and load the index.html of the app.
-  // win.loadFile('../calculator.html')
   win.loadURL(indexPath)
 
   // Open the DevTools.

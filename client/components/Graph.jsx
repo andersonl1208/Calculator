@@ -3,30 +3,18 @@
 //     <button type="button" onClick="graphFunction()">Graph</button>
 //     <div id="result"></div><br/>
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import drawGraph from '../webgl/drawGraph.js'
 import PropTypes from 'prop-types'
 
-class Graph extends React.Component {
-  constructor (props) {
-    super(props)
-    this.canvasRef = React.createRef()
-  }
+export default function Graph (props) {
+  const canvasRef = useRef(null)
 
-  // initial draw
-  componentDidMount () {
-    drawGraph(this.props.currentEquation, this.canvasRef.current)
-  }
+  useEffect(() => {
+    drawGraph(props.currentEquation, canvasRef.current)
+  })
 
-  render () {
-    const canvas = <canvas width={500} height={500} ref={ this.canvasRef }></canvas>
-
-    if (this.canvasRef.current !== null) {
-      drawGraph(this.props.currentEquation, this.canvasRef.current)
-    }
-
-    return canvas
-  }
+  return <canvas width={500} height={500} ref={ canvasRef }></canvas>
 }
 
 Graph.propTypes = {
@@ -34,7 +22,5 @@ Graph.propTypes = {
 }
 
 Graph.defaultProps = {
-  currentEquation: '',
+  currentEquation: ''
 }
-
-export default Graph
