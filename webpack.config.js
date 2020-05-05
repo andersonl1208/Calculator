@@ -109,6 +109,13 @@ const clientConfig = (env, argv) => {
       new HtmlWebpackPlugin({
         template: path.join(__dirname, 'client/calculator.html'),
         filename: path.join(__dirname, 'public/calculator.html')
+      }),
+      // Add global references to jquery
+      new webpack.ProvidePlugin({
+        $: 'jquery',
+        jQuery: 'jquery',
+        'window.jQuery': 'jquery',
+        Popper: ['popper.js', 'default']
       })
     ]
   }

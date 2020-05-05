@@ -7,20 +7,35 @@ import React, { useEffect, useRef } from 'react'
 import drawGraph from '../webgl/drawGraph.js'
 import PropTypes from 'prop-types'
 
+import { makeStyles, Card } from '@material-ui/core'
+
+const useStyles = makeStyles((theme) => ({
+  canvas: {
+    width: '100%',
+    height: 'auto'
+  }
+}))
+
 export default function Graph (props) {
+  const classes = useStyles()
+
   const canvasRef = useRef(null)
 
   useEffect(() => {
-    drawGraph(props.currentEquation, canvasRef.current)
+    drawGraph(props.tree, canvasRef.current, props.theme)
   })
 
-  return <canvas width={500} height={500} ref={ canvasRef }></canvas>
+  return (
+    <Card elevation={4} ><canvas className={classes.canvas} width='500px' height='500px' ref={ canvasRef }></canvas></Card>
+  )
 }
 
 Graph.propTypes = {
-  currentEquation: PropTypes.string
+  tree: PropTypes.object,
+  theme: PropTypes.string
 }
 
 Graph.defaultProps = {
-  currentEquation: ''
+  tree: null,
+  theme: 'light'
 }

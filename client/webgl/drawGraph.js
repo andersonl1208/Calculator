@@ -7,27 +7,25 @@ import { processFunction, evaluateFunction } from '../parser/equationParser.js'
  */
 const vertexShaderSource = `
     attribute vec4 position;
+    uniform vec4 color;
+
+    varying mediump vec4 fragColor;
 
     void main() {
         gl_Position = position;
+        fragColor = color;
     }
 `
 
 /**
- * Code for a fragment shader. Colors the fragment purple.
+ * Default fragment shader for a model
  */
-const purpleFragmentShaderSource = `
-    void main() {
-        gl_FragColor = vec4(0.5, 0.0, 0.5, 1.0);
-    }
-`
+const defaultFragmentShader = `
+    precision mediump float;
+    varying mediump vec4 fragColor;
 
-/**
- * Code for a fragment shader. Colors the fragment black. Intended specifically for shading axis fragments.
- */
-const axisShader = `
     void main() {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        gl_FragColor = fragColor;
     }
 `
 
@@ -82,25 +80,37 @@ function makeProgram (gl, vertexSource, fragmentSource) {
 /**
  *
  */
-function draw (tree, drawWindow) {
+function draw (tree, drawWindow, theme) {
   try {
     /** @type {WebGLRenderingContext} */
     const gl = drawWindow.getContext('webgl')
 
-    drawWindow.width = drawWindow.clientWidth
-    drawWindow.height = drawWindow.clientHeight
+    // drawWindow.width = drawWindow.clientWidth
+    // drawWindow.height = drawWindow.clientHeight
     gl.viewport(0, 0, drawWindow.width, drawWindow.height)
 
-    gl.clearColor(1.0, 1.0, 1.0, 1)
+    const colors = {
+      clear: [1.0, 1.0, 1.0, 1.0],
+      axes: [0, 0, 0, 1],
+      polynomial: [0.5, 0, 0.5, 1]
+    }
+
+    if (theme === 'dark') {
+      colors.clear = [0.259, 0.259, 0.259, 1.0]
+      colors.axes = [1, 1, 1, 1]
+      colors.polynomial = [0, 1, 0.251, 1]
+    }
+
+    gl.clearColor(...colors.clear)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     const axisBuffer = createAxises(gl)
     const tickMarkBuffer = createTickMarks(gl, 20, 20)
     const polynomialBuffer = createPolynomial(gl, tree)
 
-    drawLines(gl, axisBuffer, axisShader)
-    drawLines(gl, tickMarkBuffer, axisShader)
-    drawLineStrip(gl, polynomialBuffer, purpleFragmentShaderSource)
+    drawLines(gl, axisBuffer, new Float32Array(colors.axes))
+    drawLines(gl, tickMarkBuffer, new Float32Array(colors.axes))
+    drawLineStrip(gl, polynomialBuffer, new Float32Array(colors.polynomial))
   } catch (e) {
     console.error(`Draw failed with drawWindow ${drawWindow}`)
     console.error(e)
@@ -178,10 +188,9 @@ function createTickMarks (gl, numX, numY) {
  *
  * @param {WebGLRenderingContext} gl The WebGL context
  * @param {*} data JSON object holding the buffer and the number of vertices
- * @param {string} fragmentShaderSource The source code of the fragment shader
  */
-function drawLines (gl, data, fragmentShaderSource) {
-  const program = makeProgram(gl, vertexShaderSource, fragmentShaderSource)
+function drawLines (gl, data, color) {
+  const program = makeProgram(gl, vertexShaderSource, defaultFragmentShader)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, data.buffer)
 
@@ -190,6 +199,9 @@ function drawLines (gl, data, fragmentShaderSource) {
   gl.enableVertexAttribArray(position)
 
   gl.useProgram(program)
+
+  const col = gl.getUniformLocation(program, 'color')
+  gl.uniform4fv(col, color)
 
   gl.drawArrays(gl.LINES, 0, data.numVertices)
 }
@@ -199,10 +211,9 @@ function drawLines (gl, data, fragmentShaderSource) {
  *
  * @param {WebGLRenderingContext} gl The WebGL context
  * @param {*} data JSON object holding the buffer and the number of vertices
- * @param {string} fragmentShaderSource The source code of the fragment shader
  */
-function drawLineStrip (gl, data, fragmentShaderSource) {
-  const program = makeProgram(gl, vertexShaderSource, fragmentShaderSource)
+function drawLineStrip (gl, data, color) {
+  const program = makeProgram(gl, vertexShaderSource, defaultFragmentShader)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, data.buffer)
 
@@ -212,20 +223,22 @@ function drawLineStrip (gl, data, fragmentShaderSource) {
 
   gl.useProgram(program)
 
+  const col = gl.getUniformLocation(program, 'color')
+  gl.uniform4fv(col, color)
+
   gl.drawArrays(gl.LINE_STRIP, 0, data.numVertices)
 }
 
 /**
  * Called when the user clicks the graph function button. Processes and draws the function if it is valid.
  */
-function graphFunction (func, drawWindow) {
+function graphFunction (tree, drawWindow, theme) {
   try {
-    const tree = processFunction(func)
     if (tree !== null) {
-      draw(tree, drawWindow)
+      draw(tree, drawWindow, theme)
     }
   } catch (e) {
-    console.error(`Graph function failed for ${func} with drawWindow ${drawWindow}`)
+    console.error(`Graph function failed for ${tree} with drawWindow ${drawWindow}`)
     console.error(e)
   }
 }

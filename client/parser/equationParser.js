@@ -46,6 +46,9 @@ function processFunction (func) {
  * @return {Number} f(x) (the answer to the function at x).
  */
 function evaluateFunction (tree, x) {
+  if (tree === null) {
+    return null
+  }
   // Should make this into a switch
   if (tree.value === '*') {
     return Number(evaluateFunction(tree.leftChild, x)) * Number(evaluateFunction(tree.rightChild, x))
