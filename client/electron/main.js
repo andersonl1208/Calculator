@@ -24,6 +24,8 @@ function createWindow () {
       pathname: 'calculator.html',
       slashes: 'true'
     })
+    // Open the DevTools.
+    win.webContents.openDevTools()
   } else {
     console.log(__dirname)
     indexPath = url.format({
@@ -34,9 +36,6 @@ function createWindow () {
   }
 
   win.loadURL(indexPath)
-
-  // Open the DevTools.
-  win.webContents.openDevTools()
 }
 
 if (dev) {

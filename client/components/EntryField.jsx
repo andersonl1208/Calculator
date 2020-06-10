@@ -55,14 +55,14 @@ export default function EntryField (props) {
   const entryTiles = []
   for (let i = 0; i < entriesList.length; i++) {
     entryTiles.push(
-      <ListItem key={i * 2} className={classes.entry}>
+      <ListItem key={i * 3} className={classes.entry}>
         <ListItemText primary={entriesList[i]}>
         </ListItemText>
       </ListItem>
     )
     entryTiles.push(
-      <div>
-        <ListItem key={i * 2 + 1}>
+      <div key={i * 2 + 1}>
+        <ListItem>
           <ListItemText primary={resultsList[i]} className={classes.result}>
           </ListItemText>
         </ListItem>

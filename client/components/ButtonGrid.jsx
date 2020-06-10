@@ -57,9 +57,9 @@ export default function ButtonGrid (props) {
             <ButtonSection spacing={1}>
               {createButton('^(1/2)', <span>&radic;</span>)}
               {createButton('pi', <span>&pi;</span>)}
-              {createButton('7', 'e')}
-              {createButton('8', 'ln')}
-              {createButton('9', 'log')}
+              {createButton('e^(', 'e')}
+              {createButton('ln(', 'ln')}
+              {createButton('log(', 'log')}
             </ButtonSection>
           </Grid>
         </Grid>
