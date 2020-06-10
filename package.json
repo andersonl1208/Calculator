@@ -1,28 +1,66 @@
 {
   "name": "calculator",
-  "version": "1.0.0",
-  "description": "��C\u0000a\u0000l\u0000c\u0000u\u0000l\u0000a\u0000t\u0000o\u0000r\u0000 \u0000p\u0000r\u0000o\u0000g\u0000r\u0000a\u0000m\u0000\r\u0000 \u0000",
-  "main": "calculator.js",
+  "productName": "graphing-calculator",
+  "version": "2.1.0",
+  "description": "Basic graphing calculator program",
+  "main": "electron.bundle.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron ./public/electron.bundle.js",
+    "server": "babel-node server/app.js",
+    "client": "webpack --mode production",
+    "serverdev": "nodemon server/app.js",
+    "clientdev": "webpack --mode development --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "webpack --mode production",
+    "postpackage": "electron-packager ./public --out=./builds && npm version patch --no-git-tag-version"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andersonl1208/Calculator.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Luke Anderson",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/andersonl1208/Calculator/issues"
   },
   "homepage": "https://github.com/andersonl1208/Calculator#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@material-ui/core": "^4.9.12",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.51",
+    "express": "^4.17.1",
+    "jquery": "^3.5.0",
+    "minimist": "^1.2.5",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
   "devDependencies": {
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
+    "@babel/plugin-transform-async-to-generator": "^7.8.3",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-react": "^7.9.4",
+    "babel-loader": "^8.1.0",
+    "babel-preset-minify": "^0.5.1",
+    "css-loader": "^3.5.2",
+    "electron": "^8.2.3",
+    "electron-devtools-installer": "^3.0.0",
+    "electron-packager": "^14.2.1",
+    "electron-react-devtools": "^0.5.3",
     "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-node": "^11.0.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1"
+    "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "html-webpack-plugin": "^4.2.0",
+    "nodemon": "^2.0.3",
+    "style-loader": "^1.1.4",
+    "url-loader": "^4.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   }
 }
