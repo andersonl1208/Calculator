@@ -30,7 +30,7 @@
     "@material-ui/lab": "^4.0.0-alpha.51",
     "express": "^4.17.1",
     "jquery": "^3.5.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
