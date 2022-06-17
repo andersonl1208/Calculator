@@ -45,7 +45,7 @@
     "babel-loader": "^8.1.0",
     "babel-preset-minify": "^0.5.1",
     "css-loader": "^3.5.2",
-    "electron": "^8.2.3",
+    "electron": "^15.5.5",
     "electron-devtools-installer": "^3.0.0",
     "electron-packager": "^14.2.1",
     "electron-react-devtools": "^0.5.3",
